@@ -27,7 +27,7 @@ pipeline {
                 script {
                     def shortCommit = env.GIT_COMMIT.take(7)
 
-                    def nexusURL = "localhost:5003"
+                    def nexusURL = "host.docker.internal:5003"
                     def repo = "mr"
                     def imageName = "${nexusURL}/${repo}/spring-petclinic:${shortCommit}"
 
