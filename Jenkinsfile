@@ -6,19 +6,19 @@ pipeline {
     stages {
         stage('Checkstyle') {
             steps {
-                mvn Checkstyle:Checkstyle
+                sh "mvn checkstyle:checkstyle"
             }
         }
 
         stage('Test') {
             steps {
-                mvn test
+               sh "mvn test"
             }
         }
 
         stage('Build') {
             steps {
-                mvn clean package -DskipTests
+               sh "mvn clean package -DskipTests"
             }
         }
 
@@ -32,11 +32,11 @@ pipeline {
                     def imageName = "${nexusURL}/${repo}/spring-petclinic:${shortCommit}"
 
                     //build image
-                    sh "Docker build -t ${imageName} ."
+                    sh "docker build -t ${imageName} ."
 
                     // Login & push
                     withCredentials([usernamePassword(credentialsId: 'nexus-creds', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
-                        sh "echo $PASS | docker login ${nexusUrl} -u $USER --password-stdin"
+                        sh "echo $PASS | docker login ${nexusURL} -u $USER --password-stdin"
                         sh "docker push ${imageName}"
                     }
                 }
