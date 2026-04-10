@@ -14,6 +14,13 @@
 
   <name>petclinic</name>
 
+  <scm>
+    <connection>scm:git:git@github.com:skhachatryan1/spring-petclinic.git</connection>
+    <developerConnection>scm:git:git@github.com:skhachatryan1/spring-petclinic.git</developerConnection>
+    <url>https://github.com/skhachatryan1/spring-petclinic</url>
+  </scm>
+
+
   <properties>
     <!-- Generic properties -->
     <java.version>17</java.version>
