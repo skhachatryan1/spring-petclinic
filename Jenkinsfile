@@ -1,57 +1,67 @@
 pipeline {
-    agent {
-        label "docker-agent"
-    }
+    agent { label "docker-agent" }
 
     stages {
-        stage("mr pipeline") {
-                when {
-                    branch "mr"
+        stage("mr") {
+            when {
+                changeRequest()
+            }
+            stages {
+                stage("checkstyle") {
+                    steps { 
+                        sh "mvn checkstyle:checkstyle"
+                    }
                 }
-                steps {
-                    sh "mvn checkstyle:checkstyle"
-                    sh "mvn test"
-                    sh "mvn clean package -DskipTests"
-                    script {
-                        def shortCommit = env.GIT_COMMIT.take(7)
+                stage("test") {
+                    steps {
+                        sh "mvn test"
+                    }
+                }
+                stage("build") {
+                    steps {
+                        sh "mvn clean package -DskipTests"
+                    }
+                }
+                stage("tag and push") {
+                    steps {
 
-                        def nexusURL = "host.docker.internal:5003"
-                        def repo = "mr"
-                        def imageName = "${nexusURL}/${repo}/spring-petclinic:${shortCommit}"
-
-                        //build image
-                        sh "docker build -t ${imageName} ."
-
-                        // Login & push
-                        withCredentials([usernamePassword(credentialsId: 'nexus-creds', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
-                            sh "echo $PASS | docker login ${nexusURL} -u $USER --password-stdin"
-                            sh "docker push ${imageName}"
+                        sh "docker build -t spring-petclinic:${env.GIT_COMMIT.take(7)} ."
+                        withCredentials([usernamePassword(
+                            credentialsId: "nexus-creds",
+                            usernameVariable: "USER",
+                            passwordVariable: "PASS"
+                        )]) {
+                            sh "echo $PASS | docker login -u $USER --password-stdin host.docker.internal:5003"
+                            sh "docker push host.docker.internal:5003/spring-petclinic:${env.GIT_COMMIT.take(7)}"
                         }
                     }
                 }
+            }
         }
-        stage("main pipeline") {
+        stage("main") {
             when {
                 branch "main"
             }
-            steps {
-                script {
-                     def shortCommit = env.GIT_COMMIT.take(7)
-
-                        def nexusURL = "host.docker.internal:5003"
-                        def repo = "mr"
-                        def imageName = "${nexusURL}/${repo}/spring-petclinic:${shortCommit}"
-
-                        //build image
-                        sh "docker build -t ${imageName} ."
-
-                        // Login & push
-                        withCredentials([usernamePassword(credentialsId: 'nexus-creds', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
-                            sh "echo $PASS | docker login ${nexusURL} -u $USER --password-stdin"
-                            sh "docker push ${imageName}"
+            stages {
+                stage("build") {
+                    steps {
+                        sh "mvn clean package -DskipTests" 
+                    }
+                }
+                stage("tag and push") {
+                    steps {
+                        sh "docker build -t spring-petclinic:${env.GIT_COMMIT.take(7)} ."
+                        withCredentials([usernamePassword(
+                            credentialsId: "nexus-creds",
+                            usernameVariable: "USER",
+                            passwordVariable: "PASS"
+                        )]) {
+                            sh "echo $PASS | docker login -u $USER --password-stdin host.docker.internal:5002"
+                            sh "docker push host.docker.internal:5002/spring-petclinic:${env.GIT_COMMIT.take(7)}"
                         }
+                    }
                 }
             }
         }
-     }
+    }
 }
