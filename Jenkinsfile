@@ -25,7 +25,7 @@ pipeline {
                 stage("tag and push") {
                     steps {
 
-                        sh "docker build -t spring-petclinic:${env.GIT_COMMIT.take(7)} ."
+                        sh "docker build -t host.docker.internal:5003/spring-petclinic:${env.GIT_COMMIT.take(7)} ."
                         withCredentials([usernamePassword(
                             credentialsId: "nexus-creds",
                             usernameVariable: "USER",
@@ -50,7 +50,7 @@ pipeline {
                 }
                 stage("tag and push") {
                     steps {
-                        sh "docker build -t spring-petclinic:${env.GIT_COMMIT.take(7)} ."
+                        sh "docker build -t host.docker.internal:5002/spring-petclinic:${env.GIT_COMMIT.take(7)} ."
                         withCredentials([usernamePassword(
                             credentialsId: "nexus-creds",
                             usernameVariable: "USER",
