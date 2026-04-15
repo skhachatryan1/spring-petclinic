@@ -27,7 +27,7 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
-    needs: checkstyle
+    # needs: checkstyle
     steps:
     - uses: actions/checkout@v4
 
