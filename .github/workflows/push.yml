@@ -75,7 +75,7 @@ jobs:
     - name: Wait for Nexus
       run: |
           for i in {1..60}; do
-            curl -s http://localhost:8081 && break
+            curl -s http://localhost:5003/v2/ && break
             sleep 5
           done
 
