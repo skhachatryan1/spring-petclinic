@@ -83,7 +83,7 @@ jobs:
       run: docker build -t petclinic:latest .
 
     - name: nexus login
-      run: echo ${{ secrets.NEXUS_PASSWORD }} | docker login localhost:5003 -u ${{ secrets.NEXUS_USER }} --password-stdin 
+      run: echo ${{ secrets.NEXUS_PASSWORD }} | docker login localhost:5003 -u admin --password-stdin 
 
     - name: tag image
       run: docker tag petclinic:latest localhost:5003/petclinic:latest
