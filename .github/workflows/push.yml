@@ -135,7 +135,7 @@ jobs:
 
       - name: Login to Nexus Docker registry
         run: |
-          echo ${{ NEXUS_PASSWORD }} | docker login localhost:5003 -u admin --password-stdin
+          echo ${{ secrets.NEXUS_PASSWORD }} | docker login localhost:5003 -u admin --password-stdin
 
       - name: Tag image
         run: docker tag petclinic:latest localhost:5003/petclinic:latest
