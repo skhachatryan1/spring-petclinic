@@ -72,6 +72,13 @@ jobs:
 
     - uses: actions/checkout@v4
 
+    - name: Wait for Nexus
+      run: |
+          for i in {1..60}; do
+            curl -s http://localhost:8081 && break
+            sleep 5
+          done
+
     - name: create image
       run: docker build -t petclinic:latest .
 
