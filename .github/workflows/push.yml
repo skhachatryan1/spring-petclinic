@@ -54,39 +54,91 @@ jobs:
   #     run: mvn clean package -DskipTests
 
 
-  docker:
+  # docker:
+  #   runs-on: ubuntu-latest
+  #   # needs: build
+  #   services:
+  #     nexus:
+  #       image: sonatype/nexus3
+  #       ports: 
+  #       - 8081:8081
+  #       - 5003:5003
+
+  #   steps:
+  #   - uses: actions/setup-java@v4
+  #     with: 
+  #       distribution: temurin
+  #       java-version: 17
+
+  #   - uses: actions/checkout@v4
+
+  #   - name: Wait for Nexus
+  #     run: |
+  #         for i in {1..60}; do
+  #           curl -s http://localhost:5003/v2/ && break
+  #           sleep 5
+  #         done
+
+  #   - name: create image
+  #     run: docker build -t petclinic:latest .
+
+  #   - name: nexus login
+  #     run: echo ${{ secrets.NEXUS_PASSWORD }} | docker login localhost:5003 -u admin --password-stdin 
+
+  #   - name: tag image
+  #     run: docker tag petclinic:latest localhost:5003/petclinic:latest
+
+  #   - name: push image
+  #     run: docker push localhost:5003/petclinic:latest
+
+
+
+ docker:
     runs-on: ubuntu-latest
-    # needs: build
+
     services:
       nexus:
         image: sonatype/nexus3
-        ports: 
-        - 8081:8081
-        - 5003:5003
+        ports:
+          - 8081:8081
+        options: >-
+          --health-cmd "curl -f http://localhost:8081 || exit 1"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 30
 
     steps:
-    - uses: actions/setup-java@v4
-      with: 
-        distribution: temurin
-        java-version: 17
+      - uses: actions/checkout@v4
 
-    - uses: actions/checkout@v4
+      - name: Wait for Nexus UI
+        run: |
+          for i in {1..60}; do
+            curl -s http://localhost:8081 && break
+            sleep 5
+          done
 
-    - name: Wait for Nexus
-      run: |
+      - name: Login to Nexus Admin API
+        run: |
+          echo "Waiting for Nexus..."
+          sleep 30
+
+
+      - name: Wait for Docker registry port
+        run: |
           for i in {1..60}; do
             curl -s http://localhost:5003/v2/ && break
             sleep 5
           done
 
-    - name: create image
-      run: docker build -t petclinic:latest .
+      - name: Build image
+        run: docker build -t petclinic:latest .
 
-    - name: nexus login
-      run: echo ${{ secrets.NEXUS_PASSWORD }} | docker login localhost:5003 -u admin --password-stdin 
+      - name: Login to Nexus Docker registry
+        run: |
+          echo admin123 | docker login localhost:5003 -u admin --password-stdin
 
-    - name: tag image
-      run: docker tag petclinic:latest localhost:5003/petclinic:latest
+      - name: Tag image
+        run: docker tag petclinic:latest localhost:5003/petclinic:latest
 
-    - name: push image
-      run: docker push localhost:5003/petclinic:latest
+      - name: Push image
+        run: docker push localhost:5003/petclinic:latest
