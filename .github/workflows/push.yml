@@ -52,3 +52,34 @@ jobs:
 
     - name: build
       run: mvn clean package -DskipTests
+
+
+  docker:
+    runs-on: ubuntu-latest
+    needs: build
+    services:
+      nexus:
+        image: sonatype/nexus3
+        ports: 
+        - 8081:8081
+        - 5003:5003
+
+    steps:
+    - uses: actions/setup-java@v4
+      with: 
+        distribution: temurin
+        java-version: 17
+
+    - uses: actions/checkout@v4
+
+    - name: create image
+      run: docker build -t petclinic:latest .
+
+    - name: nexus login
+      run: echo ${{ secrets.NEXUS_PASSWORD }} | docker login localhost:5003 -u ${{ secrets.NEXUS_USER }} --password-stdin 
+
+    - name: tag image
+      run: docker tag petclinic:latest localhost:5003/petclinic:latest
+
+    - name: push image
+      run: docker push localhost:5003/petclinic:latest
