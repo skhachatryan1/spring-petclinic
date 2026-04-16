@@ -75,10 +75,10 @@ jobs:
       run: docker build -t petclinic:latest .
 
     - name: tag image
-      run: docker tag petclinic:latest skhachatryan11/petclinic:latest
+      run: docker tag petclinic:latest skhachatryan11/mr:latest
 
     - name: push image
-      run: docker push skhachatryan11/petclinic:latest
+      run: docker push skhachatryan11/mr:latest
 
 
 
