@@ -74,10 +74,18 @@ jobs:
 
     - name: Wait for Nexus
       run: |
-          for i in {1..60}; do
-            curl -s http://localhost:5003/v2/ && break
+          until curl -s http://localhost:8081/service/rest/v1/status | grep -q STARTED; do
             sleep 5
           done
+
+    - name: configure docker
+      run: |
+        sudo mkdir -p /etc/docker
+        echo '{
+          "insecure-registries" : ["localhost:5003"]
+        }' | sudo tee /etc/docker/daemon.json
+
+        sudo systemctl restart docker
 
     - name: create image
       run: docker build -t petclinic:latest .
