@@ -121,7 +121,7 @@ jobs:
 
       - name: Wait for Nexus API
         run: |
-          until curl -s http://localhost:8081/service/rest/v1/status | grep -q STARTED; do
+          until curl -sf http://localhost:8081/ > /dev/null; do
             sleep 5
           done
 
