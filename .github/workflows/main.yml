@@ -5,6 +5,8 @@ on:
   workflow_dispatch:   
 jobs:
   docker:
+  runs-on: ubuntu-latest
+  steps:
   - name: create image
     run: docker build -t petclinic:latest .
 
