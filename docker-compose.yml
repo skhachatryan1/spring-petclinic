@@ -16,7 +16,7 @@ services:
     container_name: petclinic-db
     restart: always
     volumes:
-      -  db-storage:/var/lib/postgresql/date
+      -  db-storage:/var/lib/postgresql/data
     environment:
       POSTGRES_DB: petclinic
       POSTGRES_USER: postgres
